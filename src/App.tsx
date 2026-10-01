@@ -2,10 +2,9 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect } from 'react';
 import { UserWarning } from './UserWarning';
-import { USER_ID } from './api/todos';
-import { client } from './utils/fetchClient';
+import { getTodos, USER_ID } from './api/todos';
 
-import type Todo from './types/Todo';
+import type { Todo } from './types/Todo';
 import type { FilterType } from './types/FilterType';
 
 import TodoList from './components/TodoList/TodoList';
@@ -20,17 +19,10 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = React.useState('');
 
   useEffect(() => {
-    if (!USER_ID) {
-      return;
-    }
-
     setErrorMessage('');
 
-    client
-      .get<Todo[]>('/todos?userId=4496')
-      .then(data => {
-        setTodos(data);
-      })
+    getTodos()
+      .then(setTodos)
       .catch(error => {
         /* eslint-disable no-console */
         console.error('Error fetching todos:', error);
@@ -51,10 +43,6 @@ export const App: React.FC = () => {
       window.clearTimeout(timeoutId);
     };
   }, [errorMessage]);
-
-  const filter = (value: FilterType) => {
-    setSelectedFilter(value);
-  };
 
   const visibleTodos = React.useMemo(() => {
     switch (selectedFilter) {
@@ -107,7 +95,7 @@ export const App: React.FC = () => {
           <Footer
             todos={todos}
             selectedFilter={selectedFilter}
-            onFilterChange={filter}
+            onFilterChange={setSelectedFilter}
           />
         )}
       </div>
